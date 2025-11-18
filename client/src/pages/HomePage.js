@@ -106,95 +106,154 @@ const HomePage = () => {
     }
   };
   return (
-    <Layout title={"ALl Products - Best offers "}>
-      <div className="container-fluid row mt-3">
-        <div className="col-md-2">
-          <h4 className="text-center">Filter By Category</h4>
-          <div className="d-flex flex-column">
-            {categories?.map((c) => (
-              <Checkbox
-                key={c._id}
-                onChange={(e) => handleFilter(e.target.checked, c._id)}
-              >
-                {c.name}
-              </Checkbox>
-            ))}
-          </div>
-          {/* price filter */}
-          <h4 className="text-center mt-4">Filter By Price</h4>
-          <div className="d-flex flex-column">
-            <Radio.Group onChange={(e) => setRadio(e.target.value)}>
-              {Prices?.map((p) => (
-                <div key={p._id}>
-                  <Radio value={p.array}>{p.name}</Radio>
+    <Layout title={"📱 TechHub - Discover Latest Gadgets"}>
+      {/* Original Hero Section - Temporarily Disabled Creative Hero */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">📱 Welcome to TechHub</h1>
+          <p className="hero-subtitle">Discover the latest gadgets and electronics from top brands</p>
+        </div>
+      </div>
+
+      <div className="home-page">
+        {/* Filters Section */}
+        <div className="filters-section">
+          <h3 className="filters-title">🔍 Refine Your Search</h3>
+          <div className="filters-grid">
+            {/* Category Filter */}
+            <div className="filter-group">
+              <div className="filter-label">📱 Categories</div>
+              {categories?.map((c) => (
+                <div key={c._id} className="filter-option">
+                  <Checkbox
+                    onChange={(e) => handleFilter(e.target.checked, c._id)}
+                  >
+                    ⚡ {c.name}
+                  </Checkbox>
                 </div>
               ))}
-            </Radio.Group>
+            </div>
+
+            {/* Price Filter */}
+            <div className="filter-group">
+              <div className="filter-label">💰 Price Range</div>
+              <Radio.Group onChange={(e) => setRadio(e.target.value)}>
+                {Prices?.map((p) => (
+                  <div key={p._id} className="filter-option">
+                    <Radio value={p.array}>{p.name}</Radio>
+                  </div>
+                ))}
+              </Radio.Group>
+            </div>
           </div>
-          <div className="d-flex flex-column">
+
+          <div style={{ marginTop: '20px', textAlign: 'center' }}>
             <button
-              className="btn reset-btn"
+              className="btn-modern btn-outline"
               onClick={() => window.location.reload()}
             >
-              RESET FILTERS
+              🔄 Reset Filters
             </button>
           </div>
         </div>
-        <div className="col-md-9 offset-1">
-          <h1 className="text-center">All Products</h1>
-          <div className="d-flex flex-wrap">
-            {products?.map((p) => (
-              <div className="card m-2" style={{ width: "18rem" }} key={p._id}>
-                <img
-                  src={`/api/v1/product/product-photo/${p._id}`}
-                  className="card-img-top"
-                  alt={p.name}
-                />
-                <div className="card-body">
-                  <h5 className="card-title">{p.name}</h5>
-                  <p className="card-text">
-                    {p.description.substring(0, 30)}...
-                  </p>
-                  <p className="card-text"> $ {p.price}</p>
-                  <div className="btn-container">
-                    <button
-                      className="btn primary-btn"
-                      onClick={() => navigate(`/product/${p.slug}`)}
-                    >
-                      More Details
-                    </button>
-                    <button
-                      className="btn secondary-btn"
-                      onClick={() => {
-                        setCart([...cart, p]);
-                        localStorage.setItem(
-                          "cart",
-                          JSON.stringify([...cart, p])
-                        );
-                        toast.success("Item Added to cart");
-                      }}
-                    >
-                      ADD TO CART
-                    </button>
+
+        {/* Products Section */}
+        <div className="section-header">
+          <h2 className="section-title">🔥 Featured Gadgets</h2>
+          <p className="section-subtitle">Latest tech and electronics just for you</p>
+        </div>
+
+        {/* Products Grid */}
+        {products?.length > 0 ? (
+          <>
+            <div className="products-grid">
+              {products?.map((p) => (
+                <div className="product-card" key={p._id}>
+                  <div className="product-image-container">
+                    <img
+                      src={`/api/v1/product/product-photo/${p._id}`}
+                      className="product-image"
+                      alt={p.name}
+                    />
+                    {p.quantity > 0 ? (
+                      <span className="product-badge">✨ In Stock</span>
+                    ) : (
+                      <span className="product-badge" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}>
+                        ❌ Out of Stock
+                      </span>
+                    )}
+                  </div>
+                  <div className="product-content">
+                    <div className="product-category">📱 {p.category?.name}</div>
+                    <h3 className="product-title">{p.name}</h3>
+                    <p className="product-description">
+                      {p.description?.substring(0, 100)}...
+                    </p>
+                    <div className="product-footer">
+                      <div className="product-price">{p.price}</div>
+                      <div className="btn-group">
+                        <button
+                          className="btn-modern"
+                          onClick={() => navigate(`/product/${p.slug}`)}
+                        >
+                          🔍 View
+                        </button>
+                        <button
+                          className="btn-modern"
+                          onClick={() => {
+                            setCart([...cart, p]);
+                            localStorage.setItem(
+                              "cart",
+                              JSON.stringify([...cart, p])
+                            );
+                            toast.success("⚡ Item added to cart!");
+                          }}
+                          disabled={p.quantity === 0}
+                          style={{
+                            opacity: p.quantity === 0 ? 0.5 : 1,
+                            cursor: p.quantity === 0 ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          🛒 {p.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            <div className="loadmore-container">
+              {products && products.length < total && (
+                <button
+                  className="loadmore-btn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage(page + 1);
+                  }}
+                  disabled={loading}
+                >
+                  {loading ? "⏳ Loading..." : "⚡ Load More Gadgets"}
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state-icon">📱</div>
+            <h3 className="empty-state-title">No Gadgets Found</h3>
+            <p className="empty-state-message">
+              Try adjusting your filters or search for something different
+            </p>
+            <button
+              className="btn-modern"
+              onClick={() => window.location.reload()}
+            >
+              🔄 Reset & Start Over
+            </button>
           </div>
-          <div className="m-2 p-3">
-            {products && products.length < total && (
-              <button
-                className="btn loadmore"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setPage(page + 1);
-                }}
-              >
-                {loading ? "Loading ..." : "Loadmore"}
-              </button>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </Layout>
   );

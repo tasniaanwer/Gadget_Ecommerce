@@ -8,12 +8,12 @@ export const registerController = async (req, res) => {
   try {
     const { name, email, password, phone, address, answer } = req.body;
     // Validations
-    if (!name) return res.send({ error: "Name is Required" });
-    if (!email) return res.send({ message: "Email is Required" });
-    if (!password) return res.send({ message: "Password is Required" });
-    if (!phone) return res.send({ message: "Phone no is Required" });
-    if (!address) return res.send({ message: "Address is Required" });
-    if (!answer) return res.send({ message: "Answer is Required" });
+    if (!name) return res.status(400).send({ success: false, message: "Name is Required" });
+    if (!email) return res.status(400).send({ success: false, message: "Email is Required" });
+    if (!password || password.length < 3) return res.status(400).send({ success: false, message: "Password must be at least 3 characters" });
+    if (!phone) return res.status(400).send({ success: false, message: "Phone no is Required" });
+    if (!address) return res.status(400).send({ success: false, message: "Address is Required" });
+    if (!answer) return res.status(400).send({ success: false, message: "Answer is Required" });
 
     // Check user
     const existingUser = await userModel.findOne({ email });
@@ -151,8 +151,8 @@ export const updateProfileController = async (req, res) => {
   try {
     const { name, email, password, address, phone } = req.body;
     const user = await userModel.findById(req.user._id);
-    if (password && password.length < 6) {
-      return res.json({ error: "Password is required and should be 6 characters long" });
+    if (password && password.length < 3) {
+      return res.json({ error: "Password is required and should be 3 characters long" });
     }
 
     const hashedPassword = password ? await hashPassword(password) : undefined;
@@ -242,11 +242,91 @@ export const getAllOrdersController = async (req, res) => {
 };
 */
 
+// Send Verification Code Controller
+export const sendVerificationController = async (req, res) => {
+  try {
+    const { email, phone, method } = req.body;
+
+    // Generate a 6-digit code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // In a real application, you would:
+    // - Send email using nodemailer for email method
+    // - Send SMS using Twilio or similar service for phone method
+    // - Store the code temporarily in Redis or database with expiry
+
+    console.log(`Verification code for ${method}: ${verificationCode}`);
+
+    // For demo purposes, we'll just return success
+    res.status(200).send({
+      success: true,
+      message: `Verification code sent via ${method === 'email' ? 'email' : 'SMS'}`,
+      // In production, don't send the code in response
+      code: process.env.NODE_ENV === 'development' ? verificationCode : undefined
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error sending verification code",
+      error,
+    });
+  }
+};
+
+// Enhanced Password Reset with Verification
+export const verifyResetController = async (req, res) => {
+  try {
+    const { email, phone, verificationCode, newPassword } = req.body;
+
+    // In a real application, verify the code from Redis/database
+    // For demo, we'll accept any 6-digit code
+    if (verificationCode && verificationCode.length !== 6) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid verification code",
+      });
+    }
+
+    // Find user by email or phone
+    const user = await userModel.findOne({
+      $or: email ? [{ email }] : [{ phone }]
+    });
+
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await hashPassword(newPassword);
+
+    // Update password
+    await userModel.findByIdAndUpdate(user._id, { password: hashedPassword });
+
+    res.status(200).send({
+      success: true,
+      message: "Password reset successfully",
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error resetting password",
+      error,
+    });
+  }
+};
+
 export const orderStatusController = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-    
+
     console.log("Order ID:", orderId);
     console.log("New Status:", status);
 

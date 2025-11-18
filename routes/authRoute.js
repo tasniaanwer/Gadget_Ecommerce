@@ -8,7 +8,9 @@ import {
   getAllOrdersController,
   orderStatusController,
   getOrdersController,
-  
+  sendVerificationController,
+  verifyResetController,
+
 } from "../controllers/authController.js";
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 
@@ -24,6 +26,12 @@ router.post("/login", loginController);
 
 //Forgot Password || POST
 router.post("/forgot-password", forgotPasswordController);
+
+// Send Verification Code || POST
+router.post("/send-verification", sendVerificationController);
+
+// Verify Reset with Code || POST
+router.post("/verify-reset", verifyResetController);
 
 //test routes
 router.get("/test", requireSignIn, isAdmin, testController);
