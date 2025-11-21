@@ -24,9 +24,34 @@ const router = express.Router();
 //routes
 router.post(
   "/create-product",
+  (req, res, next) => {
+    console.log("=== BEFORE AUTH ===");
+    console.log("Headers:", req.headers);
+    console.log("Authorization:", req.headers.authorization);
+    next();
+  },
   requireSignIn,
   isAdmin,
-  formidable(),
+  (req, res, next) => {
+    console.log("=== BEFORE FORMIDABLE ===");
+    console.log("After auth, user:", req.user);
+    next();
+  },
+  formidable({
+    multiples: true,
+    keepExtensions: true,
+    maxFileSize: 2 * 1024 * 1024, // 2MB
+    filter: function ({name, originalFilename, mimetype}) {
+      // keep only images
+      return mimetype && mimetype.includes("image");
+    }
+  }),
+  (req, res, next) => {
+    console.log("=== AFTER FORMIDABLE ===");
+    console.log("Fields:", req.fields);
+    console.log("Files:", req.files);
+    next();
+  },
   createProductController
 );
 //routes
@@ -70,7 +95,5 @@ router.get("/product-category/:slug", productCategoryController);
 
 // Mock Payment Route
 router.post("/mock-payment", requireSignIn, mockPaymentController);
-
-router.post("/create-product", requireSignIn, isAdmin, formidable(), createProductController);
 
 export default router;

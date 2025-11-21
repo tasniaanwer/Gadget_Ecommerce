@@ -11,32 +11,60 @@ dotenv.config();
 
 export const createProductController = async (req, res) => {
   try {
+    console.log("=== CREATE PRODUCT CONTROLLER CALLED ===");
+    console.log("req.fields:", req.fields);
+    console.log("req.files:", req.files);
+
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
-    //alidation
+
+    //validation
     switch (true) {
-      case !name:
-        return res.status(500).send({ error: "Name is Required" });
-      case !description:
-        return res.status(500).send({ error: "Description is Required" });
-      case !price:
-        return res.status(500).send({ error: "Price is Required" });
+      case !name || name.trim() === "":
+        return res.status(400).send({ error: "Name is Required" });
+      case !description || description.trim() === "":
+        return res.status(400).send({ error: "Description is Required" });
+      case !price || isNaN(price):
+        return res.status(400).send({ error: "Valid Price is Required" });
       case !category:
-        return res.status(500).send({ error: "Category is Required" });
-      case !quantity:
-        return res.status(500).send({ error: "Quantity is Required" });
+        return res.status(400).send({ error: "Category is Required" });
+      case !quantity || isNaN(quantity):
+        return res.status(400).send({ error: "Valid Quantity is Required" });
+      case !photo:
+        return res.status(400).send({ error: "Photo is Required" });
       case photo && photo.size > 1000000:
         return res
-          .status(500)
-          .send({ error: "photo is Required and should be less then 1mb" });
+          .status(400)
+          .send({ error: "Photo should be less than 1mb" });
     }
 
-    const products = new productModel({ ...req.fields, slug: slugify(name) });
-    if (photo) {
-      products.photo.data = fs.readFileSync(photo.path);
-      products.photo.contentType = photo.type;
+    // Check if category exists
+    const categoryExists = await categoryModel.findById(category);
+    if (!categoryExists) {
+      return res.status(400).send({ error: "Invalid Category" });
     }
+
+    const products = new productModel({
+      name: name.trim(),
+      description: description.trim(),
+      price: parseFloat(price),
+      category,
+      quantity: parseInt(quantity),
+      shipping: shipping === "1" || shipping === true,
+      slug: slugify(name.trim())
+    });
+
+    if (photo) {
+      try {
+        products.photo.data = fs.readFileSync(photo.path);
+        products.photo.contentType = photo.type;
+      } catch (fileError) {
+        console.log("File reading error:", fileError);
+        return res.status(400).send({ error: "Error reading photo file" });
+      }
+    }
+
     await products.save();
     res.status(201).send({
       success: true,
@@ -44,11 +72,13 @@ export const createProductController = async (req, res) => {
       products,
     });
   } catch (error) {
-    console.log(error);
+    console.log("=== ERROR IN CREATE PRODUCT ===");
+    console.log("Full error:", error);
+    console.log("Error stack:", error.stack);
     res.status(500).send({
       success: false,
-      error,
-      message: "Error in crearing product",
+      error: error.message,
+      message: "Error in creating product",
     });
   }
 };

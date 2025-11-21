@@ -6,6 +6,7 @@ import  { connectDB } from "./config/db.js";
 import authRoute from "./routes/authRoute.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import formidable from 'express-formidable';
 
 import cors from "cors";
 //configure env
@@ -23,6 +24,7 @@ const app = express()
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+// Remove global formidable - apply it only to specific routes
 
 //routes
  app.use("/api/v1/auth", authRoute)
