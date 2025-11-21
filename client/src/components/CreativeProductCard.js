@@ -236,12 +236,12 @@ const CreativeProductCard = ({ product, onAddToCart, onViewDetails, disabled }) 
                 color: isHovered ? '#0ea5e9' : '#10b981'
               }}
             >
-              ${product.price || '99.99'}
+              ৳{product.price || '99.99'}
             </motion.div>
 
             {product.originalPrice && (
               <div className="original-price">
-                ${product.originalPrice}
+                ৳{product.originalPrice}
               </div>
             )}
           </div>

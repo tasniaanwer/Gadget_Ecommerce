@@ -16,7 +16,7 @@ const CreativeHero = () => {
   ];
 
   const features = [
-    { icon: <FiTruck />, title: "Fast Delivery", desc: "Free delivery on orders over $50" },
+    { icon: <FiTruck />, title: "Fast Delivery", desc: "Free delivery on orders over ৳25,000" },
     { icon: <FiHeadphones />, title: "24/7 Support", desc: "Dedicated customer support" },
     { icon: <FiShield />, title: "Secure Payment", desc: "100% secure transactions" },
     { icon: <FiRefreshCw />, title: "Easy Returns", desc: "30-day return policy" }
